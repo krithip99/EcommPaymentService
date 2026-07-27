@@ -9,7 +9,7 @@ import project.ecom.paymentservice.dto.ErrorResponseDto;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(PaymentGatewayException.class)
-    public ResponseEntity<ErrorResponseDto> handlePaymentGatewayException(com.razorpay.RazorpayException ex) {
+    public ResponseEntity<ErrorResponseDto> handlePaymentGatewayException(PaymentGatewayException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDto("Payment gateway error: " + ex.getMessage()));
     }
 }
