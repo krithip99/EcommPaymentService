@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import project.ecom.paymentservice.entity.OutboxEvent;
 import project.ecom.paymentservice.event.Event;
-import project.ecom.paymentservice.event.PaymentEvent;
 import project.ecom.paymentservice.repository.OutboxEventRepository;
 
 import java.util.List;
@@ -24,7 +23,7 @@ public class OutboxEventService {
     }
 
     public void saveOutboxEvent(Event event) {
-        OutboxEvent outboxEvent = new OutboxEvent(event.eventId(), "", false, event.eventType());
+        OutboxEvent outboxEvent = new OutboxEvent(event.eventId(), "", false, event.eventType(), event.aggregateType(), event.aggregateId());
         try {
             String payload = objectMapper.writeValueAsString(event);
             outboxEvent.setMessage(payload);

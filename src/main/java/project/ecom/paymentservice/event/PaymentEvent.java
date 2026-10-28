@@ -1,5 +1,6 @@
 package project.ecom.paymentservice.event;
 
+import project.ecom.paymentservice.entity.AggregateType;
 import project.ecom.paymentservice.entity.EventType;
 
 import java.util.UUID;
@@ -17,8 +18,8 @@ public record PaymentEvent(
     }
 
     @Override
-    public Aggregate aggregate() {
-        return Aggregate.PAYMENT;
+    public AggregateType aggregateType() {
+        return AggregateType.PAYMENT;
     }
 
     @Override

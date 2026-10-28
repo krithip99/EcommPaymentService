@@ -14,6 +14,7 @@ public class OutboxEvent extends BaseClass {
     private UUID eventId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private AggregateType aggregateType;
 
     @Column(nullable = false)
@@ -29,11 +30,13 @@ public class OutboxEvent extends BaseClass {
     @Enumerated(EnumType.STRING)
     private EventType eventType;
 
-    public OutboxEvent(UUID eventId, String message, boolean isPublished, EventType eventType) {
+    public OutboxEvent(UUID eventId, String message, boolean isPublished, EventType eventType, AggregateType aggregateType, Long aggregateId) {
         this.eventId = eventId;
         this.message = message;
         this.isPublished = isPublished;
         this.eventType = eventType;
+        this.aggregateId = aggregateId;
+        this.aggregateType = aggregateType;
     }
 
     public String getMessage() {
