@@ -1,7 +1,7 @@
 package project.ecom.paymentservice.service;
 
-import com.razorpay.RazorpayException;
+import project.ecom.paymentservice.dto.PaymentLinkRequestDto;
 
 public interface PaymentGateway {
-    String getPaymentGatewayLink(long amount, long orderId, String customerName, String customerEmail, String customerContactNo);
+    String getPaymentLink(PaymentLinkRequestDto paymentLinkRequestDto);
 }

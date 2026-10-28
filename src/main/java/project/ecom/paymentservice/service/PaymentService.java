@@ -1,8 +1,13 @@
 package project.ecom.paymentservice.service;
 
-import com.razorpay.RazorpayException;
-import project.ecom.paymentservice.dto.PaymentGatewayLinkResponseDto;
+import project.ecom.paymentservice.dto.PaymentLinkResponseDto;
 
 public interface PaymentService {
-    PaymentGatewayLinkResponseDto getPaymentGatewayLink(int orderId);
+    PaymentLinkResponseDto getPaymentLink(int orderId);
+
+    String getPaymentStatus(Long id);
+
+    void handlePaymentSucceedWebhook(String paymentId, Long amountReceived);
+
+    void handlePaymentFailedWebhook(String paymentId, Long amountReceived);
 }

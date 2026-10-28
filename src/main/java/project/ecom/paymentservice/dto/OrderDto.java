@@ -2,7 +2,7 @@ package project.ecom.paymentservice.dto;
 
 public class OrderDto {
     private long orderId;
-    private long amount;
+    private long totalAmount;
     private OrderStatus orderStatus;
     private String customerName;
     private String customerEmail;
@@ -16,12 +16,12 @@ public class OrderDto {
         this.orderId = orderId;
     }
 
-    public long getAmount() {
-        return amount;
+    public long getTotalAmount() {
+        return totalAmount;
     }
 
-    public void setAmount(long amount) {
-        this.amount = amount;
+    public void setTotalAmount(long totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     public OrderStatus getOrderStatus() {

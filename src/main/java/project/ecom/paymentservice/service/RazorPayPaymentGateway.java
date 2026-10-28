@@ -4,8 +4,11 @@ import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import org.json.JSONObject;
+import org.springframework.stereotype.Component;
+import project.ecom.paymentservice.dto.PaymentLinkRequestDto;
 import project.ecom.paymentservice.exception.PaymentGatewayException;
 
+@Component
 public class RazorPayPaymentGateway implements PaymentGateway{
     private RazorpayClient razorpayClient;
 
@@ -14,18 +17,18 @@ public class RazorPayPaymentGateway implements PaymentGateway{
     }
 
     @Override
-    public String getPaymentGatewayLink(long amount, long orderId, String customerName, String customerEmail, String customerContactNo)  {
+    public String getPaymentLink(PaymentLinkRequestDto paymentLinkRequestDto)  {
         JSONObject paymentLinkRequest = new JSONObject();
-        paymentLinkRequest.put("amount",amount);
+        paymentLinkRequest.put("amount",paymentLinkRequestDto.getAmount());
         paymentLinkRequest.put("currency","INR");
         paymentLinkRequest.put("expire_by", System.currentTimeMillis() + 10*60*1000);
-        paymentLinkRequest.put("reference_id", orderId);
-        paymentLinkRequest.put("description","Payment for "+ orderId);
+        paymentLinkRequest.put("reference_id", paymentLinkRequestDto.getPaymentId());
+        paymentLinkRequest.put("description","Payment for "+ paymentLinkRequestDto.getOrderId());
 
         JSONObject customer = new JSONObject();
-        customer.put("name", customerName);
-        customer.put("contact", customerContactNo);
-        customer.put("email", customerEmail);
+        customer.put("name", paymentLinkRequestDto.getCustomerName());
+        customer.put("contact", paymentLinkRequestDto.getContactNo());
+        customer.put("email", paymentLinkRequestDto.getCustomerEmail());
         paymentLinkRequest.put("customer",customer);
         JSONObject notify = new JSONObject();
         notify.put("sms",true);
