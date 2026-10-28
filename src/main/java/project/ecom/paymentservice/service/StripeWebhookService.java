@@ -3,12 +3,14 @@ package project.ecom.paymentservice.service;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
+import com.stripe.model.StripeObject;
 import com.stripe.net.Webhook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import project.ecom.paymentservice.exception.InvalidSignatureException;
 import project.ecom.paymentservice.exception.MalformedWebhookException;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -55,9 +57,9 @@ public class StripeWebhookService {
             return;
         }
 
-        Object object = event.getDataObjectDeserializer().getObject();
+        Optional<StripeObject> stripeObject = event.getDataObjectDeserializer().getObject();
 
-        if(!(object instanceof PaymentIntent paymentIntent)){
+        if(!(stripeObject.isPresent()) || !(stripeObject.get() instanceof PaymentIntent paymentIntent)) {
             throw new MalformedWebhookException("Stripe event does not contain a valid PaymentIntent.");
         }
 
