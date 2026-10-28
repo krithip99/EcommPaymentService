@@ -6,7 +6,9 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.model.StripeObject;
 import com.stripe.net.Webhook;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
+import project.ecom.paymentservice.entity.SourceProvider;
 import project.ecom.paymentservice.exception.InvalidSignatureException;
 import project.ecom.paymentservice.exception.MalformedWebhookException;
 
@@ -14,7 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-public class StripeWebhookService {
+public class StripeWebhookService implements WebhookService{
     @Value("${stripe.webhook.secret}")
     private String webHookSecret;
     private PaymentService paymentService;
@@ -57,6 +59,12 @@ public class StripeWebhookService {
             return;
         }
 
+        String stripeEventId = event.getId();
+
+        if(stripeEventId.isEmpty()){
+            throw new MalformedWebhookException("Stripe event ID is missing.");
+        }
+
         Optional<StripeObject> stripeObject = event.getDataObjectDeserializer().getObject();
 
         if(!(stripeObject.isPresent()) || !(stripeObject.get() instanceof PaymentIntent paymentIntent)) {
@@ -67,14 +75,18 @@ public class StripeWebhookService {
         if(paymentId == null){
             throw new MalformedWebhookException("Payment ID not found in payment intent metadata");
         }
-
-        switch (event.getType()) {
-            case "payment_intent.succeeded":
-                paymentService.handlePaymentSucceedWebhook(paymentId, paymentIntent.getAmountReceived());
-                break;
-            case "payment_intent.payment_failed":
-                paymentService.handlePaymentFailedWebhook(paymentId, paymentIntent.getAmountReceived());
-                break;
+        try{
+            switch (event.getType()) {
+                case "payment_intent.succeeded":
+                    paymentService.handlePaymentSucceedWebhook(stripeEventId, paymentId, paymentIntent.getAmountReceived(), SourceProvider.STRIPE);
+                    break;
+                case "payment_intent.payment_failed":
+                    paymentService.handlePaymentFailedWebhook(stripeEventId, paymentId, paymentIntent.getAmountReceived(), SourceProvider.STRIPE);
+                    break;
+            }
+        }catch(DataIntegrityViolationException e){
+            throw new MalformedWebhookException("Data integrity violation while processing webhook", e);
         }
+
     }
 }

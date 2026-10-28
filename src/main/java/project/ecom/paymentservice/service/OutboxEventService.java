@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import project.ecom.paymentservice.entity.OutboxEvent;
+import project.ecom.paymentservice.entity.SourceProvider;
 import project.ecom.paymentservice.event.Event;
 import project.ecom.paymentservice.repository.OutboxEventRepository;
 
@@ -22,15 +23,14 @@ public class OutboxEventService {
         this.outboxEventRepository = outboxEventRepository;
     }
 
-    public void saveOutboxEvent(Event event) {
-        OutboxEvent outboxEvent = new OutboxEvent(event.eventId(), "", false, event.eventType(), event.aggregateType(), event.aggregateId());
+    public void saveOutboxEvent(Event event, SourceProvider sourceProvider, Long sourceEventId) {
         try {
             String payload = objectMapper.writeValueAsString(event);
-            outboxEvent.setMessage(payload);
+            OutboxEvent outboxEvent = new OutboxEvent(event.eventId(), payload, false, event.eventType(), event.aggregateType(), event.aggregateId(), sourceProvider, sourceEventId);
+            outboxEventRepository.saveAndFlush(outboxEvent);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Could not serialize payment succeeded event", e);
         }
-        outboxEventRepository.save(outboxEvent);
     }
 
     public void save(List<OutboxEvent> outboxEvents) {

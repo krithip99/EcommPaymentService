@@ -9,6 +9,7 @@ import project.ecom.paymentservice.dto.PaymentLinkResponseDto;
 import project.ecom.paymentservice.entity.EventType;
 import project.ecom.paymentservice.entity.Payment;
 import project.ecom.paymentservice.entity.PaymentStatus;
+import project.ecom.paymentservice.entity.SourceProvider;
 import project.ecom.paymentservice.event.Event;
 import project.ecom.paymentservice.event.PaymentEvent;
 import project.ecom.paymentservice.exception.PaymentNotFoundException;
@@ -56,11 +57,11 @@ public class PaymentServiceImpl implements PaymentService{
 
     @Override
     @Transactional
-    public void handlePaymentSucceedWebhook(String paymentId, Long amountReceived) {
+    public void handlePaymentSucceedWebhook(String stripeEventId, String paymentId, Long amountReceived, SourceProvider sourceProvider) {
         Payment payment = paymentRepository.findById(Long.valueOf(paymentId)).orElseThrow(() -> new PaymentNotFoundException("Payment not found"));
-        payment.setPaymentStatus(PaymentStatus.SUCCESS);
-        paymentRepository.save(payment);
-
+        if(payment.getPaymentStatus() == PaymentStatus.SUCCESS){
+            return;
+        }
         Event event = new PaymentEvent(
                 UUID.randomUUID(),
                 payment.getId(),
@@ -69,12 +70,16 @@ public class PaymentServiceImpl implements PaymentService{
                 EventType.PAYMENT_SUCCEED
         );
 
-        outboxEventService.saveOutboxEvent(event);
+        outboxEventService.saveOutboxEvent(event, sourceProvider, Long.valueOf(stripeEventId));
+
+        payment.setPaymentStatus(PaymentStatus.SUCCESS);
+        paymentRepository.save(payment);
+
     }
 
     @Override
     @Transactional
-    public void handlePaymentFailedWebhook(String paymentId, Long amountReceived) {
+    public void handlePaymentFailedWebhook(String stripeEventId, String paymentId, Long amountReceived, SourceProvider sourceProvider) {
         Payment payment = paymentRepository.findById(Long.valueOf(paymentId)).orElseThrow(() -> new PaymentNotFoundException("Payment not found"));
         payment.setPaymentStatus(PaymentStatus.FAILED);
         paymentRepository.save(payment);
@@ -87,7 +92,7 @@ public class PaymentServiceImpl implements PaymentService{
                 EventType.PAYMENT_FAILED
         );
 
-        outboxEventService.saveOutboxEvent(event);
+        outboxEventService.saveOutboxEvent(event, sourceProvider, Long.valueOf(stripeEventId));
     }
 }
 
